@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# Basic Awk script to parse the output of "stim status" into a two-line 
+# summary of the current task, time spent on that task since the last
+# task change, time spent this session (i.e. today), and total time for
+# the session, in a format like:
+#
+# MyProject/My Task
+# 00:10 :: 00:45 :: 04:30
+#
+# This is suitable for use in desktop or taskbar widgets such as Conky.
+#
+
+# --------------------------------------------------------------------------
+#                                                       CONFIGURATION
+# --------------------------------------------------------------------------
+
+STIM=$(which stim 2>/dev/null)
+#STIM=$HOME/bin/stim
+
+AWK=$(which awk 2>/dev/null)
+
+# --------------------------------------------------------------------------
+#                                                       MAIN
+# --------------------------------------------------------------------------
+
+# check we have a stim executable
+if [ -z "$STIM" ]
+then
+  echo "Error: could not find 'stim' executable.  Check path?"
+  exit 1
+fi
+
+# check we have an awk
+if [ -z "$AWK" ]
+then
+  echo "Error: could not find 'awk' executable.  Check path?"
+  exit 1
+fi
+
+# get current status
+$STIM status | $AWK '
+function hm(secs)
+{
+  minutes = secs / 60;
+  hours = minutes / 60;
+  minutes = minutes % 60;
+
+  return sprintf("%d:%02d", hours, minutes);
+}
+
+{
+  session_elapsed = $1;
+  session_task = $2;
+  current_start = $3;
+
+  # there is no "current_task = $4..." to get everything after the third 
+  # field, so blank out the first three (which leaves spaces) and then 
+  # copy everything minus the spaces.  Yuck!
+  $1 = $2 = $3 = "";
+
+  current_task = substr($0,4);
+
+  if (current_start == -1)
+  {
+    current_task = "-=[ stopped ! ]=-";
+    task_now = 0;
+  }
+  else
+  {
+    task_now = systime() - current_start;
+  }
+
+  task_session = task_now + session_task;
+  session_total = task_now + session_elapsed;
+
+  printf "%s\n%s :: %s :: %s", current_task, hm(task_now), hm(task_session), hm(session_total);
+}'
