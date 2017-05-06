@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include <sys/stat.h>
-//#include "tinyxml.h"
 
 
 //#define DEBUG
@@ -54,6 +53,19 @@ struct TTimeChunk
 typedef vector<TTimeChunk> TTimeSpent;
 
 
+/*
+ * TSessionStatus - for returning information about current session
+ */
+struct TSessionStatus
+{
+  time_t aSessionTime;    // session time excluding current work period
+  time_t aTaskTime;       // task time for session excluding current work period
+  time_t aTransitionTime; // start time of current work period
+  string sCurrentTask;    // current task or last task worked on
+  bool   bRunning;        // whether timer is currently running
+};
+
+
 class Stim
 {
 public:
@@ -62,7 +74,7 @@ public:
     static Stim* Create(const char* szConnection);
 
     // constructor, destructor
-    Stim(const char* szStimName, const char* szContract);
+    Stim(const char* szStimName, const char* szContract, bool bInitialise = false);
     virtual ~Stim(void);
 
     // start and stop tasks
@@ -73,7 +85,7 @@ public:
     virtual void LogTask(time_t aTime, const string &sMessage);
 
     // report time spent
-    virtual bool Status();
+    virtual bool Status(TSessionStatus& tSession);
     virtual bool ReportTime(
         const string& sDateRange, 
         vector<string>& vTaskPaths,
@@ -102,6 +114,7 @@ private:
 
     string m_sStimDir;
     string m_sContract;
+    bool m_bInitialise;
 
     // log file
     string m_sStimLog;

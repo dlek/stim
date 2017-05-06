@@ -12,6 +12,7 @@ const char g_szUsage[] =
 "Usage: stim start <task>\n"
 "       stim stop\n"
 "       stim log <message>\n"
+"       stim status [--raw]\n"
 "       stim report <daterange> [taskpath...]\n";
 
 
@@ -24,18 +25,8 @@ int main(int argc, char** argv)
     map<string, string> vOptions;
     string sStimDirectory;
 
-    // TODO: this should be configurable, and a default
-    string sContract("general");
-
     // assume the best
     iStatus = STIM_CLI_RETURN_SUCCESS;
-
-    // determine home directory
-    sStimDirectory = getenv("HOME");
-    sStimDirectory += "/.stim";
-
-    // initialise Stim
-    Stim cStim(sStimDirectory.c_str(), sContract.c_str());
 
     // get parameters into vector of strings
     if (argc > 1)
@@ -63,6 +54,38 @@ int main(int argc, char** argv)
         }
     }
 
+    // determine stim directory
+    const char* szStimHome = getenv(STIM_CLI_ENV_HOME);
+    if (szStimHome)
+    {
+      sStimDirectory = szStimHome;
+    }
+    else
+    {
+      sStimDirectory = getenv("HOME");
+      sStimDirectory += "/.stim";
+    }
+
+    // determine contract
+    const char* szContract = getenv(STIM_CLI_ENV_CONTRACT);
+    string sContract;
+    if (szContract)
+    {
+      sContract = szContract;
+    }
+    else
+    {
+      sContract = "general";
+    }
+
+    // are we going to try to initialize the environment?
+    bool bInitialize = false;
+    if (!vOptions["init"].empty())
+      bInitialize = true;
+
+    // initialise Stim
+    Stim cStim(sStimDirectory.c_str(), sContract.c_str(), bInitialize);
+
     // attempt to parse command
     try
     {
@@ -71,64 +94,131 @@ int main(int argc, char** argv)
             std::cout << g_szUsage << std::endl;
             exit(0);
         }
-        else if (sCommand == "start")
+        else if (sCommand == "init")
         {
-            // syntax: start <task>
-            if (vArgs.size() != 1)
-                throw "start <task>";
-            string sTask = vArgs[0];
+          // initialise Stim environment
+          Stim cStim(sStimDirectory.c_str(), sContract.c_str(), true);
+        }
+        else
+        {
+          // ensure Stim environment
+          Stim cStim(sStimDirectory.c_str(), sContract.c_str(), false);
 
-            // specified time?
-            time_t tWhen;
-            if (vOptions["when"].empty())
-              tWhen = time(0);
-            else
-            {
-              string& sWhen = vOptions["when"];
-              if (sWhen.c_str()[0] == '-')
+          // handle Stim command
+          if (sCommand == "start")
+          {
+              // syntax: start <task>
+              if (vArgs.size() != 1)
+                  throw "Usage: start <task>";
+              string sTask = vArgs[0];
+
+              // specified time?
+              time_t tWhen;
+              if (vOptions["when"].empty())
+                tWhen = time(0);
+              else
               {
-                // TODO: fill this out  
+                string& sWhen = vOptions["when"];
+                if (sWhen.c_str()[0] == '-')
+                {
+                  // TODO: fill this out  
+                }
               }
-            }
 
 
-            // now start the task
-            cStim.StartTask(tWhen, sTask);
-        }
-        else if (sCommand == "stop")
-        {
-            // syntax: stop
-            if (vArgs.size() > 0)
-                throw "stop";
+              // now start the task
+              cStim.StartTask(tWhen, sTask);
+          }
+          else if (sCommand == "stop")
+          {
+              // syntax: stop
+              if (vArgs.size() > 0)
+                  throw "Usage: stop";
+              
+              // now stop the current task
+              cStim.StopTask(time(0));
+          }
+          else if (sCommand == "log")
+          {
+              // syntax: log <message>
+              if (vArgs.size() != 1)
+                  throw "Usage: log <message>";
+              string sMessage = vArgs[0];
+
+              // now log the message
+              cStim.LogTask(time(0), sMessage);
+          }
+          else if (sCommand == "status")
+          {
+              // syntax: status [--raw]
+              if (vArgs.size() > 0)
+              {
+                  throw "Usage: status";
+              }
             
-            // now stop the current task
-            cStim.StopTask(time(0));
-        }
-        else if (sCommand == "log")
-        {
-            // syntax: log <message>
-            if (vArgs.size() != 1)
-                throw "log <message>";
-            string sMessage = vArgs[0];
+              // raw or readable?
+              bool bRaw = false;
+              if (!vOptions["raw"].empty())
+                bRaw = true;
 
-            // now log the message
-            cStim.LogTask(time(0), sMessage);
-        }
-        else if (sCommand == "status")
-        {
-            // syntax: status
-            if (vArgs.size() > 0)
-            {
-                throw "status";
-            }
+              // get status
+              TSessionStatus tSession;
+              bool bHaveResults = cStim.Status(tSession);
 
-            cStim.Status();
-        }
-        else if (sCommand == "report")
-        {
+              // report
+              if (bRaw)
+              {
+                if (!bHaveResults)
+                {
+                  cout << "0 0 -1 false Nothing" << endl;
+                  iStatus = STIM_CLI_RETURN_NO_RESULTS;
+                }
+                else
+                {
+                  // echo session and task times, timer state and current or last task
+                  cout 
+                    << tSession.aSessionTime << " " 
+                    << tSession.aTaskTime << " " 
+                    << tSession.aTransitionTime 
+                    << (tSession.bRunning ? " running " : " stopped ")
+                    << tSession.sCurrentTask << endl; 
+                }
+              }
+              else
+              {
+                if (!bHaveResults)
+                {
+                  cout << "Nothing today." << endl;
+                  iStatus = STIM_CLI_RETURN_NO_RESULTS;
+                }
+                else
+                {
+                  // unlike the "raw" output, the human-readable output 
+                  // calculates the session time with the current task's time
+                  // included
+                  time_t aElapsedOnTask = time(0) - tSession.aTransitionTime;
+
+                  // make session and task times readable
+                  string sSessionTime;
+                  string sTaskTime;
+                  SecondsToHms(tSession.aSessionTime + aElapsedOnTask, sSessionTime);
+                  SecondsToHms(tSession.aTaskTime + aElapsedOnTask, sTaskTime);
+
+                  // echo session and task times, timer state and current or last task
+                  cout
+                    << "Session time: " << sSessionTime << std::endl
+                    << "Task time:    " << sTaskTime << std::endl
+                    << "Task:         " << tSession.sCurrentTask  << std::endl
+                    << "Timer is      " << (tSession.bRunning ? "running" : "stopped")
+                    << endl;
+                }
+              }
+          }
+          else if (sCommand == "report")
+          {
             // syntax: report <daterange> [taskpath...]
             if (vArgs.size() == 0)
-                throw "report <daterange> [taskpath...]";
+                throw "Usage: report <daterange> [taskpath...]";
             string sDateRange = vArgs[0];
 
             // get optional task paths
@@ -246,18 +336,25 @@ int main(int argc, char** argv)
               cout << endl;
               PrintOutTotals(sDateRange, vPeriodTime);
             }
+          }
+          else
+          {
+              throw ("No such command: " + sCommand).c_str();
+          }
         }
-        else
-        {
-            throw ("No such command: " + sCommand).c_str();
-        }
+    }
+    catch (const string sError)
+    {
+        std::cerr << sError << std::endl << std::endl;
+        std::cerr << g_szUsage << std::endl;
+        iStatus = STIM_CLI_RETURN_USAGE_ERROR;
     }
     catch (const char* szError)
     {
-        std::cerr << szError << std::endl;
+        std::cerr << szError << std::endl << std::endl;
         std::cerr << g_szUsage << std::endl;
         iStatus = STIM_CLI_RETURN_USAGE_ERROR;
-   }
+    }
 
-   exit(iStatus);
+    exit(iStatus);
 }

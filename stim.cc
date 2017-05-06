@@ -14,12 +14,13 @@ using std::vector;
 
 
 // Ensure Stim environment exists and is useful
-int EnsureStimEnvironment(const char* szHomeDir)
+int EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bInitialise)
 { 
   struct stat sb;
-  string s = szHomeDir;
+  string s;
 
   // check that home directory exists
+  s = szHomeDir;
   if (stat(szHomeDir, &sb) == 0)
   { 
     // check whether it's a directory
@@ -30,11 +31,46 @@ int EnsureStimEnvironment(const char* szHomeDir)
     }
   }
   else
-  { 
-    // create directory
-    if (mkdir(szHomeDir, 0750) != 0)
+  {
+    if (bInitialise)
     { 
-      throw("mkdir " + s + " failed");
+      // create directory
+      if (mkdir(szHomeDir, 0700) != 0)
+      { 
+        string s = szHomeDir;
+        throw("mkdir " + s + " failed");
+      }
+    }
+    else
+    {
+      throw(s + " does not exist");
+    }
+  }
+
+  // check that the log file exists
+  s = szLogFile;
+  if (stat(szLogFile, &sb) == 0)
+  {
+    // check whether it's a readable/writable file
+    if (access(szLogFile, R_OK | W_OK) != 0)
+    {
+      // we can't do anything with this
+      throw(s + " cannot be read and written");
+    }
+  }
+  else
+  {
+    if (bInitialise)
+    {
+      // create file
+      if (mknod(szLogFile, S_IFREG | 0600, 0) != 0)
+      {
+        throw(s + " could not be created");
+      }
+    }
+    else
+    {
+      throw(s + " does not exist");
     }
   }
 }
@@ -149,10 +185,11 @@ void GkGrokTimestamp(time_t& aTime, const char* szDate)
 // -----------------------------------------------------------------------
 
 
-Stim::Stim(const char* szStimName, const char* szContract)
+Stim::Stim(const char* szStimName, const char* szContract, bool bInitialise)
 {
     m_sStimDir = szStimName;
     m_sContract = szContract;
+    m_bInitialise = bInitialise;
 
     // determine file names
     m_sStimLog = m_sStimDir + "/" + m_sContract + ".log";
@@ -174,6 +211,9 @@ Stim::~Stim(void)
 void Stim::Initialise(void)
 {
     Stim::Trace("Initialising Stim (trace on)");
+
+    // if we're in an initialisation mode, ensure the home environment is set up
+    EnsureStimEnvironment(m_sStimDir.c_str(), m_sStimLog.c_str(), m_bInitialise);
 
     // open the log document
     m_fLog.open(m_sStimLog.c_str(), ios::in);
@@ -489,7 +529,7 @@ void PrintOutTotals(const string& sStart, map<string, time_t>& vTaskTime)
 }
 
 
-bool Stim::Status(void)
+bool Stim::Status(TSessionStatus& tSession)
 {
     // make sure containers are initialised
     this->Initialise();
@@ -520,9 +560,11 @@ bool Stim::Status(void)
     string sSessionStartDate = ""; 
     string sTimestamp, sEvent, sDetail;
     bool bContinue = true;
+    bool bRunning;
     while (bContinue)
     {
         Stim::Trace("here we are... about to read a log line...");
+
         // read the next record
         bContinue = ReadLog(sTimestamp, sEvent, sDetail);
 
@@ -570,15 +612,17 @@ bool Stim::Status(void)
 
             // this task becomes the previous task
             sLastTask = sDetail;
-            tLastTime = tTimeStamp;
         }
         else if (sEvent == STIM_TASK_STOP)
         {
             Stim::Trace("Stopping task");
 
-            // there is no previous task
-            tLastTime = STIM_TIME_NOTIME;
+            // if it were true, you'd better catch it
+            bRunning = false;
         }
+
+        // this is the start time of the current time chunk
+        tLastTime = tTimeStamp;
     }
 
     // determine total session time, excluding current task
@@ -588,11 +632,14 @@ bool Stim::Status(void)
         tTotalTime = GetTotalTime(vSessionTime);
     }
 
-    // echo current task, current task's start time, and rest of session time
-    cout << tTotalTime << " " << vSessionTime[sLastTask] << " " << tLastTime << " " << sLastTask << endl;
+    // fill out struct
+    tSession.aSessionTime = tTotalTime;
+    tSession.aTaskTime = vSessionTime[sLastTask];
+    tSession.aTransitionTime = tLastTime;
+    tSession.sCurrentTask = sLastTask;
+    tSession.bRunning = bRunning;
 
     return true;
-   
 }
 
 
