@@ -1,0 +1,36 @@
+# compilers
+CXX = @CXX@
+LD = @CXX@
+CXXFLAGS = @CXXFLAGS@
+
+# application executable
+APPLICATION = stim
+
+# object files
+OBJECTS = stim_cli.cc stim.cc
+
+# primary target
+all: $(APPLICATION)
+
+# same but with DEBUG flag flying
+debug: 
+	$(MAKE) all "CFLAGS=-DDEBUG"
+
+# application target
+$(APPLICATION): $(OBJECTS)
+	$(CXX) $(LFLAGS) $(OBJECTS) -o $(APPLICATION)
+
+# general rule for building object files
+%.o: %.cc
+	$(CC) $(CFLAGS) -c $<
+
+# test report functionality
+test-report: $(APPLICATION)
+	$(APPLICATION) report bob
+
+# clean up object files
+clean:
+	-rm -f *.o core $(APPLICATION)
+
+# clean first, then make
+remake: clean $(APPLICATION)
