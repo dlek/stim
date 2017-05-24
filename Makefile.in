@@ -32,5 +32,9 @@ test-report: $(APPLICATION)
 clean:
 	-rm -f *.o core $(APPLICATION)
 
+# clean up autoconf stuff
+confclean:
+	-rm -Rf autom4te.cache/ configure
+
 # clean first, then make
 remake: clean $(APPLICATION)

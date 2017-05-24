@@ -6,9 +6,7 @@ AC_PROG_CXX
 
 dnl verifies at least one source file is where it should be
 AC_CONFIG_SRCDIR([stim.hh])
-AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile])
 
-dnl AC_OUTPUT(Makefile)
-AC_OUTPUT
+dnl Process Makefile.in to create Makefile
+AC_OUTPUT(Makefile)
 
