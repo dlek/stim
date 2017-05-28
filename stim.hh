@@ -74,8 +74,11 @@ public:
     static Stim* Create(const char* szConnection);
 
     // constructor, destructor
-    Stim(const char* szStimName, const char* szContract, bool bInitialise = false);
+    Stim(const char* szStimName, const char* szContract);
     virtual ~Stim(void);
+
+    // initialise environment
+    virtual void Initialise(void);
 
     // start and stop tasks
     virtual void StartTask(
@@ -85,8 +88,9 @@ public:
     virtual void LogTask(time_t aTime, const string &sMessage);
 
     // report time spent
-    virtual bool Status(TSessionStatus& tSession);
+    virtual bool Status(time_t tNow, TSessionStatus& tSession);
     virtual bool ReportTime(
+        time_t tNow,
         const string& sDateRange, 
         vector<string>& vTaskPaths,
         TTimeSpent& vTimeSpent);
@@ -96,7 +100,7 @@ public:
 protected:
 
     // internal 
-    virtual void Initialise(void);
+    virtual void EnsureInitialised(void);
     virtual void Destroy(void);
     virtual void WriteLog(
         const string& sTimestamp, 

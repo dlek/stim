@@ -15,6 +15,116 @@ const char g_szUsage[] =
 "       stim status [--raw]\n"
 "       stim report <daterange> [taskpath...]\n";
 
+/*
+** Helper functions
+*/
+
+// interpret "32m20s" as a number of seconds
+// This is a pretty dorky implementation
+int interpret_relative_timespec(const char* timespec)
+{
+  int num[3];
+  char ch[3];
+  int seconds;
+
+  seconds = 0;
+  int items = sscanf(timespec, "%d%c%d%c%d%c", &num[0], &ch[0], &num[1], &ch[1], &num[2], &ch[2]);
+  for (int i = 0; i < items / 2; i++)
+  {
+    switch(ch[i])
+    {
+      case 'h':
+        seconds += num[i] * 3600;
+        break;
+      case 'm':
+        seconds += num[i] * 60;
+        break;
+      case 's':
+        seconds += num[i];
+        break;
+      default:
+        throw "Invalid relative time specifications";
+    }
+  }
+
+  return seconds;
+}
+
+time_t interpret_absolute_timespec(time_t now, const char* timespec)
+{
+  int year, month, day, hours, minutes, seconds;
+
+  // initialize struct with current time as defaults
+  struct tm* pTm = localtime(&now); 
+
+  // get pointer to timespec so we can move it along
+  char* bufptr = (char*) timespec;
+
+  int items = sscanf(timespec, "%04d%02d%02d ", &year, &month, &day);
+  if (items == 3)
+  {
+    // move buffer along nine characters in order to interpret time
+    bufptr += sizeof(char) * 9;
+
+    // record date in struct
+    pTm->tm_mday = day;
+    pTm->tm_mon = (month - 1);
+    pTm->tm_year = (year - 1900); 
+  }
+  items = sscanf(bufptr, "%d:%02d:%02d", &hours, &minutes, &seconds);
+  if (items == 3)
+  {
+    pTm->tm_hour = hours;
+    pTm->tm_min = minutes;
+    pTm->tm_sec = seconds;
+  }
+  else
+  { // guess they didn't specify seconds
+    items = sscanf(bufptr, "%d:%02d", &hours, &minutes);
+    if (items == 2)
+    {
+      pTm->tm_hour = hours;
+      pTm->tm_min = minutes;
+    }
+    else
+      throw "Invalid absolute time specification";
+  }
+
+  // convert struct into timestamp
+  return(mktime(pTm));
+}
+
+
+// interpret time spec, if provided, for logging operations; if not provided
+// use current time
+time_t interpret_timespec(time_t tNow, string sWhen)
+{
+  time_t tWhen;
+  if (sWhen.empty())
+    tWhen = tNow;
+  else
+  {
+    if (sWhen.c_str()[0] == '-')
+    { // relative time
+      // TODO: fill this out
+      // -30s means 30 sconds ago
+      // -1h means 1 hour ago
+      // -1m30s means one minute, 30 seconds ago
+      time_t tBackWhen = interpret_relative_timespec(
+        sWhen.c_str() + sizeof(char));
+
+      // calculate back from now
+      tWhen = tNow - tBackWhen;
+    }
+    else
+    { // absolute time
+      time_t tWhen = interpret_absolute_timespec(tNow, sWhen.c_str());
+    }
+  }
+
+  return tWhen;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -27,6 +137,30 @@ int main(int argc, char** argv)
 
     // assume the best
     iStatus = STIM_CLI_RETURN_SUCCESS;
+
+    // check if we're using fake now for debugging or testing
+    time_t tNow;
+    const char* szFakeNow = getenv(STIM_ENV_FAKENOW);
+    if (szFakeNow == NULL)
+      tNow = time(0);
+    else
+      tNow = (time_t) atoi(szFakeNow);
+
+    // set operating parameters from environment or from defaults
+    // timestamp format
+    const char* szTimestampFormat = getenv(STIM_ENV_TIMESTAMP_FORMAT);
+    if (szTimestampFormat == NULL)
+      szTimestampFormat = STIM_DEFAULT_TIMESTAMP_FORMAT;
+
+    // reporting format
+    const char* szReportFormat = getenv(STIM_ENV_REPORT_FORMAT);
+    if (szReportFormat == NULL)
+      szReportFormat = STIM_DEFAULT_REPORT_FORMAT;
+
+    // log reporting format
+    const char* szLogFormat = getenv(STIM_ENV_LOG_FORMAT);
+    if (szLogFormat == NULL)
+      szLogFormat = STIM_DEFAULT_LOG_FORMAT;
 
     // get parameters into vector of strings
     if (argc > 1)
@@ -55,7 +189,7 @@ int main(int argc, char** argv)
     }
 
     // determine stim directory
-    const char* szStimHome = getenv(STIM_CLI_ENV_HOME);
+    const char* szStimHome = getenv(STIM_ENV_HOME);
     if (szStimHome)
     {
       sStimDirectory = szStimHome;
@@ -67,7 +201,7 @@ int main(int argc, char** argv)
     }
 
     // determine contract
-    const char* szContract = getenv(STIM_CLI_ENV_CONTRACT);
+    const char* szContract = getenv(STIM_ENV_CONTRACT);
     string sContract;
     if (szContract)
     {
@@ -77,14 +211,6 @@ int main(int argc, char** argv)
     {
       sContract = "general";
     }
-
-    // are we going to try to initialize the environment?
-    bool bInitialize = false;
-    if (!vOptions["init"].empty())
-      bInitialize = true;
-
-    // initialise Stim
-    Stim cStim(sStimDirectory.c_str(), sContract.c_str(), bInitialize);
 
     // attempt to parse command
     try
@@ -97,12 +223,13 @@ int main(int argc, char** argv)
         else if (sCommand == "init")
         {
           // initialise Stim environment
-          Stim cStim(sStimDirectory.c_str(), sContract.c_str(), true);
+          Stim cStim(sStimDirectory.c_str(), sContract.c_str());
+          cStim.Initialise();
         }
         else
         {
           // ensure Stim environment
-          Stim cStim(sStimDirectory.c_str(), sContract.c_str(), false);
+          Stim cStim(sStimDirectory.c_str(), sContract.c_str());
 
           // handle Stim command
           if (sCommand == "start")
@@ -113,19 +240,8 @@ int main(int argc, char** argv)
               string sTask = vArgs[0];
 
               // specified time?
-              time_t tWhen;
-              if (vOptions["when"].empty())
-                tWhen = time(0);
-              else
-              {
-                string& sWhen = vOptions["when"];
-                if (sWhen.c_str()[0] == '-')
-                {
-                  // TODO: fill this out  
-                }
-              }
-
-
+              time_t tWhen = interpret_timespec(tNow, vOptions["when"]);
+              
               // now start the task
               cStim.StartTask(tWhen, sTask);
           }
@@ -134,9 +250,12 @@ int main(int argc, char** argv)
               // syntax: stop
               if (vArgs.size() > 0)
                   throw "Usage: stop";
+
+              // specified time?
+              time_t tWhen = interpret_timespec(tNow, vOptions["when"]);
               
               // now stop the current task
-              cStim.StopTask(time(0));
+              cStim.StopTask(tWhen);
           }
           else if (sCommand == "log")
           {
@@ -145,8 +264,11 @@ int main(int argc, char** argv)
                   throw "Usage: log <message>";
               string sMessage = vArgs[0];
 
+              // specified time?
+              time_t tWhen = interpret_timespec(tNow, vOptions["when"]);
+
               // now log the message
-              cStim.LogTask(time(0), sMessage);
+              cStim.LogTask(tWhen, sMessage);
           }
           else if (sCommand == "status")
           {
@@ -163,19 +285,18 @@ int main(int argc, char** argv)
 
               // get status
               TSessionStatus tSession;
-              bool bHaveResults = cStim.Status(tSession);
+              bool bHaveResults = cStim.Status(tNow, tSession);
 
               // report
               if (bRaw)
               {
                 if (!bHaveResults)
                 {
-                  cout << "0 0 -1 false Nothing" << endl;
+                  cout << "0 0 -1 stopped Nothing" << endl;
                   iStatus = STIM_CLI_RETURN_NO_RESULTS;
                 }
                 else
                 {
-                  // echo session and task times, timer state and current or last task
                   cout 
                     << tSession.aSessionTime << " " 
                     << tSession.aTaskTime << " " 
@@ -196,7 +317,7 @@ int main(int argc, char** argv)
                   // unlike the "raw" output, the human-readable output 
                   // calculates the session time with the current task's time
                   // included
-                  time_t aElapsedOnTask = time(0) - tSession.aTransitionTime;
+                  time_t aElapsedOnTask = tNow - tSession.aTransitionTime;
 
                   // make session and task times readable
                   string sSessionTime;
@@ -231,7 +352,7 @@ int main(int argc, char** argv)
 
             // get time spent
             TTimeSpent vTimeSpent;
-            if (!cStim.ReportTime(sDateRange, vTaskPaths, vTimeSpent))
+            if (!cStim.ReportTime(tNow, sDateRange, vTaskPaths, vTimeSpent))
             {
                 std::cerr << "Nothing to report." << std::endl;
                 iStatus = STIM_CLI_RETURN_NO_RESULTS;
@@ -250,23 +371,11 @@ int main(int argc, char** argv)
             map<string, time_t> vPeriodTime;
             for (it3 = vTimeSpent.begin(); it3 != vTimeSpent.end(); it3++)
             {
-              if (vOptions["dateformat"].empty())
-              {
-                GkMakeTimestamp(it3->aStartTime, szStartTimestamp);
-                GkMakeTimestamp(it3->aStopTime, szStopTimestamp);
-              }
-              else
-              {
-                strftime(szStartTimestamp, 255, vOptions["dateformat"].c_str(), localtime(&it3->aStartTime));
-                strftime(szStopTimestamp, 255, vOptions["dateformat"].c_str(), localtime(&it3->aStopTime));
-              }
+              strftime(szStartTimestamp, 255, 
+                szTimestampFormat, localtime(&it3->aStartTime));
+              strftime(szStopTimestamp, 255, 
+                szTimestampFormat, localtime(&it3->aStopTime));
 
-              // determine separator (TODO: use constant defined elsewhere)
-              if (vOptions["separator"].empty())
-                sSeparator = " :: ";
-              else
-                sSeparator = vOptions["separator"];
-              
               // calculate elapsed time
               aElapsed = it3->aStopTime - it3->aStartTime;
               
@@ -282,53 +391,50 @@ int main(int argc, char** argv)
                 it5 = it3->vLogMessages.begin();
                 while (1) // only do comparison (below) once
                 {
-                  if (vOptions["dateformat"].empty())
-                    GkMakeTimestamp(it5->aLogTime, szLogTimestamp);
-                  else
-                    strftime(szLogTimestamp, 255, vOptions["dateformat"].c_str(), localtime(&it5->aLogTime));
+                  strftime(szLogTimestamp, 255, 
+                    szTimestampFormat, localtime(&it5->aLogTime));
+                  
+                  // TODO: this should be generalized; create a dictionary
+                  // and send it off 
+                  string sLogFormat = szLogFormat;
+                  string::size_type pos;
+                  pos = sLogFormat.find("%WHEN%");
+                  if (pos != string::npos)
+                    sLogFormat.replace(pos, 6, szLogTimestamp);
+                  pos = sLogFormat.find("%LOG%");
+                  if (pos != string::npos)
+                    sLogFormat.replace(pos, 5, it5->sLogMessage);
 
-                  sLogMessages.append(szLogTimestamp);
-                  sLogMessages += ": " + it5->sLogMessage;
+                  sLogMessages += sLogFormat;
                   if (++it5 == it3->vLogMessages.end())
                     break;
-                  else
-                    sLogMessages += sSeparator;
                 }
               }
 
-              if (vOptions["format"].empty())
-              {
-                printf("%17s to %17s | %8s | %s\n", 
-                  szStartTimestamp, 
-                  szStopTimestamp, 
-                  sElapsed.c_str(), 
-                  it3->sTaskPath.c_str());
-              }
-              else
-              {
-                string sFormat = vOptions["format"];
-                string::size_type pos;
-                pos = sFormat.find("%BEGIN%");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 7, szStartTimestamp);
-                pos = sFormat.find("%END%");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 5, szStopTimestamp);
-                pos = sFormat.find("%DETAIL%");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 8, it3->sTaskPath.c_str());
-                pos = sFormat.find("%ELAPSED%");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 9, sElapsed.c_str());
-                pos = sFormat.find("%LOG%");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 5, sLogMessages.c_str());
-                pos = sFormat.find("\\n");
-                if (pos != string::npos)
-                  sFormat.replace(pos, 2, "\n");
-                printf("%s", sFormat.c_str());
-                //printf("%s\n", sFormat.c_str());
-              }
+              // TODO: this should be generalized; create a dictionary
+              // and send it off 
+              string sFormat = szReportFormat;
+              string::size_type pos;
+              pos = sFormat.find("%BEGIN%");
+              if (pos != string::npos)
+                sFormat.replace(pos, 7, szStartTimestamp);
+              pos = sFormat.find("%END%");
+              if (pos != string::npos)
+                sFormat.replace(pos, 5, szStopTimestamp);
+              pos = sFormat.find("%DETAIL%");
+              if (pos != string::npos)
+                sFormat.replace(pos, 8, it3->sTaskPath.c_str());
+              pos = sFormat.find("%ELAPSED%");
+              if (pos != string::npos)
+                sFormat.replace(pos, 9, sElapsed.c_str());
+              pos = sFormat.find("%LOG%");
+              if (pos != string::npos)
+                sFormat.replace(pos, 5, sLogMessages.c_str());
+              pos = sFormat.find("\\n");
+              if (pos != string::npos)
+                sFormat.replace(pos, 2, "\n");
+              printf("%s", sFormat.c_str());
+              //printf("%s\n", sFormat.c_str());
             }
             
             if (!vPeriodTime.empty() && vOptions["no-summary"].empty())

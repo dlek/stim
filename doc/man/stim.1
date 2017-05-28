@@ -1,25 +1,29 @@
 .\" Process this file with
 .\" groff -man -Tascii stim.1
 .\"
-.TH STIM 1 "November 2012" "geekfactor" "geekfactor"
+.TH STIM 1 "May 2017" "geekfactor" "geekfactor"
 .SH NAME
 stim \- Simple Task Information Management
 .SH SYNOPSIS
+.B stim init
+.PP
 .B stim start \fR[\fB--when=\\fItimespec\fR] \fItask\fR
-
-.B stim stop
-
-.B stim log \fImessage\fR
-
-.B stim report \fR[\fB--dateformat=\fIdateformat\fR] [\fB--separator=\fIstr\fR] 
-     [\fB--format=\fIformat\fR] [\fB--no-summary\fR] \fIdaterange\fR [\fItaskpath ...\fR]
-
-.B stim status
+.br
+.B stim stop \fR[\fB--when=\\fItimespec\fR]
+.br
+.B stim log \fR[\fB--when=\\fItimespec\fR] \fImessage\fR
+.PP
+.B stim report [\fB--no-summary\fR] \fIdaterange\fR [\fItaskpath ...\fR]
+.br
+.B stim status \fR[\fB--raw\fR]
 .SH DESCRIPTION
 .PP
-\fBStim\fR is a simple application for tracking time spent on various tasks.  Stim records context switches and session stops and provides a reporting mechanism.  While a simple command-line utility, \fBStim\fR can integrate with the user environment and desktop tools to provide a fairly useful time clock.
+\fBStim\fR is a simple application for tracking time spent on various tasks.  Stim records session starts, switches and stops and provides a reporting mechanism.  While a simple command-line utility, \fBStim\fR can integrate with the user environment and desktop tools to provide a fairly useful time clock.
+.SH INITIALISATION
 .PP
-Originally \fBStim\fR was meant to also assist in task and project management by supporting the organization of task information and projection.  This may be implemented or integrated in later versions but currently \fBStim\fR will remain a time logging application.
+The following command initialises the Stim environment by creating the directory and log file.
+.TP
+.B stim init
 .SH LOGGING
 .PP
 The following commands perform logging functions for tracking time spent on various projects and tasks.
@@ -43,30 +47,11 @@ Time is logged at the current time, minus the specified offset.
 .SH REPORTING
 The following commands perform reporting functions.
 .TP
-.B stim report [\fB--dateformat=\fIdateformat\fR] [\fB--separator=\fIstr\fR] 
-     [\fB--format=\fIformat\fR] [\fB--no-summary\fR] \fIdaterange\fR [\fItaskpath ...\fR]
-.br
-Report time for period given by \fIdaterange\fR, optionally limited to projects and tasks limited by \fItaskpath\fR.
-.br
-.B --dateformat=\fIdateformat\fR
-Date will be output according to format as interpreted by strftime(3).
-.br
-.B \fB--separator=\fIstr\fR
-Log entries for a task will be separated by \fIstr\fR.
-.br
-.B \fB--format=\fIformat\fR
-Line items will be formatted using the template \fIformat\fR.  In this the following substitutions are made:
-.br
-.B  \fB%BEGIN%\fR, \fB%END%\fR
-The beginning and end times of the task, respectively.
-.br
-.B  \fB%DETAIL%\fR
-The project and task.
-.br
-.B  \fB%LOG%\fR
-The log entries, if any, associated with the task session.
+.B stim report [\fB--no-summary\fR] \fIdaterange\fR [\fItaskpath ...\fR]
 .TP
-.B \fBno-aummary\fR
+Report time for period given by \fIdaterange\fR, optionally limited to projects and tasks limited by \fItaskpath\fR.
+.TP
+.B \fB--no-summary\fR
 Suppress summary with totals over given date range.
 .TP
 .B \fIdaterange\fR
@@ -74,18 +59,82 @@ Report for the specified period.  The basic format for this argument is \fIYYYYM
 .TP
 .B \fItaskpath\fR
 Report only the specified projects and tasks.
+.PP 
+Reporting can be customized with environment variables; see below.
 .TP
-.B stim status
-Produce a bare-bones report on the time worked today, on the current task, and in this session.  There are four fields: the total time worked today up to the current session, the time spent on the current task today up to the current session, the start time of the current session and the current task.
+.B stim status [\fB--raw\fR]
+.PP
+Produce a brief report on the time worked today, on the current task, and in this session.  By default this is a tabular, human-readable summary, such as the following:
+.PP
+.RS
+Session time: 03:02:04
+.br
+Task time:    01:42:42
+.br
+Task:         BigBlueDoor.com/Operations
+.br
+Timer is      running
+.RE
+.PP
+This output shows you have been working for three hours and two minutes this session (typically your workday), including one hour and 42 minutes on the current task, which is Operations in the Big Blue Door project.  The timer is currently running.
+.PP
+If \fB--raw\fR is specified, the output is produced in a single line, expresses both elapsed time and absolute time in seconds, and is suitable as input to scripts.  The output looks like this:
+.PP
+.RS
+10282 5520 1495861896 running BigBlueDoor.com/Operations
+.RE
+.PP
+These five fields are the session time in seconds, the task time in seconds, the Unix timestamp (seconds since the Epoch) of the current task, the timer state, and the current task.  This output is a different representation of the more human-readable format shown previously, but all of the produced values are static until the next task transition (that is, until the timer is stopped or a new task is begun).
+.PP
+The first two fields indicate time spent in the session or on the task until the current transition, which started at the timestamp described by the third field.  A script making use of this data could therefore calculate the time spent since the last transition as the current time in seconds, minus the value of the third field.  To calculate the total session time this value would be added to the value of the first field.
+.PP
+If the timer is not running and there has been no work logged today, the result will be:
+.PP
+.RS
+0 0 -1 stopped Nothing
+.RE
+.PP
+.SH ENVIRONMENT VARIABLES
+.PP
+The following environment variables may be set.
+.TP
+.B STIM_HOME
+This is the home directory for Stim; defaults to \fI$HOME/.stim\fR.
+.TP
+.B STIM_CONTRACT
+Work can be isolated to separate log files by specifying a contract.  The default is \fIgeneral\fR and so by default work will be logged to \fI$HOME/.stim/general.log\fR.
+.TP
+.B STIM_REPORT_FORMAT
+Report line items will be formatted using this template, in which the following substitutions are made:
 
-The output of this command is designed such that it only needs to be invoked when the log file is updated, and the current status in human terms (i.e., time worked today including current session, etc.) can be calculated from the given reference points with minimal access to the log file.
+.B \fB%BEGIN%\fR, \fB%END%\fR, \fB%ELAPSED%\fR:
+The beginning, end and elapsed times of the task, respectively.
+.br
+.B  \fB%DETAIL%\fR:
+The project and task.
+.br
+.B  \fB%LOG%\fR:
+The log entries, if any, associated with the task session.
+.TP
+.B STIM_REPORT_FORMAT_LOG
+Log items in the report will be formatted using this template, in which the following substitutions are made:
+
+.B  \fB%WHEN%\fR:
+The timestamp on the log entry.
+.br
+.B  \fB%LOG%\fR:
+The log entry.
+.TP
+.B STIM_TIMESTAMP_FORMAT
+Date will be output according to this format as interpreted by strftime(3).  The default is \fI%Y%m%d %H:%M:%S\fR, resulting in '20170324 09:00:00' for 9 a.m. on 24 March 2017.
+
 .SH BUGS
 Some unimplemented features, as noted.  Otherwise please send reports to stim-bugs@geekfactor.com.
 
-It is necesary to create ~/.stim/general.log manually before using the program.
-
-When specified absolute timespec, it may seem odd that if seconds are not specified, the current timestamp's seconds are used.  One alternative would be to use an arbitrary constant, the most obvious probably "00".  Events logged with this value for the seconds may then be spuriously interpreted as having a manually entered time, even if that was not the case.  As such, using an arbitrary constant both adds extra information, and causes that information to be intrinsically inaccurate.
-
+.B Absolute time specification
+.TP
+When specifying absolute timestamp, it may seem odd that if seconds are not specified, the current timestamp's seconds are used.  One alternative would be to use an arbitrary constant, the most obvious probably "00".  Events logged with this value for the seconds may then be spuriously interpreted as having a manually entered time, even if that was not the case.  As such, using an arbitrary constant both adds extra information, and causes that information to be intrinsically inaccurate.
+.PP
 Another option may have been to use a random number, but is more actively deceptive than simply using the current timestamp.
-
+.PP
 Forcing the user to specify seconds is just ridiculous.

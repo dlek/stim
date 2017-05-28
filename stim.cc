@@ -15,7 +15,7 @@ using std::vector;
 
 
 // Ensure Stim environment exists and is useful
-int EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bInitialise)
+int EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bInitialise = false)
 { 
   struct stat sb;
   string s;
@@ -36,6 +36,7 @@ int EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bIn
     if (bInitialise)
     { 
       // create directory
+      printf("Going to try to make the directory '%s'\n", szHomeDir);
       if (mkdir(szHomeDir, 0700) != 0)
       { 
         string s = szHomeDir;
@@ -186,11 +187,10 @@ void GkGrokTimestamp(time_t& aTime, const char* szDate)
 // -----------------------------------------------------------------------
 
 
-Stim::Stim(const char* szStimName, const char* szContract, bool bInitialise)
+Stim::Stim(const char* szStimName, const char* szContract)
 {
     m_sStimDir = szStimName;
     m_sContract = szContract;
-    m_bInitialise = bInitialise;
 
     // determine file names
     m_sStimLog = m_sStimDir + "/" + m_sContract + ".log";
@@ -211,10 +211,17 @@ Stim::~Stim(void)
 
 void Stim::Initialise(void)
 {
+  // actively ensure the home environent is set up
+  EnsureStimEnvironment(m_sStimDir.c_str(), m_sStimLog.c_str(), true);
+}
+
+
+void Stim::EnsureInitialised(void)
+{
     Stim::Trace("Initialising Stim (trace on)");
 
-    // if we're in an initialisation mode, ensure the home environment is set up
-    EnsureStimEnvironment(m_sStimDir.c_str(), m_sStimLog.c_str(), m_bInitialise);
+    // ensure the home environment is set up
+    EnsureStimEnvironment(m_sStimDir.c_str(), m_sStimLog.c_str());
 
     // open the log document
     m_fLog.open(m_sStimLog.c_str(), ios::in);
@@ -242,7 +249,7 @@ void Stim::WriteLog(
     const string& sDetail = "")
 {
     // make sure containers are initialised
-    this->Initialise();
+    this->EnsureInitialised();
 
     // ensure log is open in read/write
     if (m_bLogReadOnly)
@@ -398,18 +405,19 @@ bool stringtrim(string& s)
 
 
 void DeterminePeriod(
+    time_t tNow,
     const string& sDateRange, 
     time_t& aPeriodStart, 
     time_t& aPeriodEnd)
 {
     if (stringcmpi(sDateRange, STIM_DATE_TODAY) == 0)
     {
-        aPeriodStart = DetermineStartOfDay(time(0));
+        aPeriodStart = DetermineStartOfDay(tNow);
         aPeriodEnd = aPeriodStart + SECONDS_IN_DAY - 1;
     }
     else if (stringcmpi(sDateRange, STIM_DATE_YESTERDAY) == 0)
     {
-        aPeriodStart = DetermineStartOfDay(time(0) - SECONDS_IN_DAY);
+        aPeriodStart = DetermineStartOfDay(tNow - SECONDS_IN_DAY);
         aPeriodEnd = aPeriodStart + SECONDS_IN_DAY - 1;        
     }
     else // format is "<date>", "-<date>", "<date>-", "<date1>-<date2>", or ""
@@ -437,7 +445,7 @@ void DeterminePeriod(
             if (stringtrim(sEnd))
                 aPeriodEnd = DetermineStartOfDay(sEnd) + SECONDS_IN_DAY - 1;
             else
-                aPeriodEnd = time(0);
+                aPeriodEnd = tNow;
         }
     }
 }
@@ -530,15 +538,15 @@ void PrintOutTotals(const string& sStart, map<string, time_t>& vTaskTime)
 }
 
 
-bool Stim::Status(TSessionStatus& tSession)
+bool Stim::Status(time_t tNow, TSessionStatus& tSession)
 {
     // make sure containers are initialised
-    this->Initialise();
+    this->EnsureInitialised();
 
     // determine period for reporting
     string sDateRange = "today";
     time_t aPeriodStart, aPeriodEnd;
-    DeterminePeriod(sDateRange, aPeriodStart, aPeriodEnd);
+    DeterminePeriod(tNow, sDateRange, aPeriodStart, aPeriodEnd);
 
     // seek to beginning of range
     /* TODO: this should seek to beginning of session; it currently seeks
@@ -645,16 +653,17 @@ bool Stim::Status(TSessionStatus& tSession)
 
 
 bool Stim::ReportTime(
+  time_t tNow,
   const string& sDateRange, 
   vector<string>& vTaskPaths,
   TTimeSpent& vTimeSpent)
 {
     // make sure containers are initialised
-    this->Initialise();
+    this->EnsureInitialised();
 
     // determine period for reporting
     time_t aPeriodStart, aPeriodEnd;
-    DeterminePeriod(sDateRange, aPeriodStart, aPeriodEnd);
+    DeterminePeriod(tNow, sDateRange, aPeriodStart, aPeriodEnd);
 
     // seek to beginning of range
     if (!FindPeriodStart(aPeriodStart, aPeriodEnd))
