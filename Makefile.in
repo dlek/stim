@@ -3,6 +3,13 @@ CXX = @CXX@
 LD = @CXX@
 CXXFLAGS = @CXXFLAGS@
 
+# directories
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
+bindir = @bindir@
+mandir = @mandir@
+
 # application executable
 APPLICATION = stim
 
@@ -38,3 +45,8 @@ confclean: clean
 
 # clean first, then make
 remake: clean $(APPLICATION)
+
+# install
+install: $(APPLICATION)
+       install -m 0755 stim $(bindir)
+       install -m 0644 doc/man/stim.1 $(mandir)
