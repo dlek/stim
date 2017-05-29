@@ -48,5 +48,5 @@ remake: clean $(APPLICATION)
 
 # install
 install: $(APPLICATION)
-       install -m 0755 stim $(bindir)
-       install -m 0644 doc/man/stim.1 $(mandir)
+	install -m 0755 stim $(bindir)
+	install -m 0644 doc/man/stim.1 $(mandir)
