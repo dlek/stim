@@ -1,2 +1,2 @@
 language: cpp
-script: autoconf && ./configure && make
+script: autoconf && ./configure && make && make test

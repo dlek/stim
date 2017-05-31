@@ -31,9 +31,9 @@ $(APPLICATION): $(OBJECTS)
 %.o: %.cc
 	$(CC) $(CFLAGS) -c $<
 
-# test report functionality
-test-report: $(APPLICATION)
-	$(APPLICATION) report bob
+# testing
+test: $(APPLICATION)
+  @STIM=`pwd`/$(APPLICATION) testing/test-all
 
 # clean up object files
 clean:

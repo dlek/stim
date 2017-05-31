@@ -1,0 +1,313 @@
+20041029 11:14:07 start Operations/Monitoring
+20041029 12:01:41 start Operations/Requests
+20041029 12:01:52 start Operations/Monitoring
+20041029 12:45:58 stop 
+20041029 13:22:36 stop 
+20041029 13:28:43 start Operations/Monitoring
+20041029 14:06:44 start Operations/Documentation
+20041029 14:08:22 start Operations/Monitoring
+20041029 14:09:30 start Operations/Documentation
+20041029 16:02:06 start Operations/Monitoring
+20041029 18:33:01 stop 
+20041101 10:32:20 start Operations/Monitoring
+20041101 11:14:15 start Operations/Monitoring
+20041101 12:42:37 start Operations/Monitoring
+20041101 15:18:31 start Operations/Requests
+20041101 18:00:00 stop 
+20041102 10:30:59 start Operations/Requests
+20041102 11:22:46 start Operations/Monitoring
+20041102 11:25:06 start Operations/Requests
+20041102 12:55:26 start Operations/Monitoring
+20041102 12:55:37 start Operations/Requests
+20041102 12:55:55 start Operations/Monitoring
+20041102 13:09:04 start Operations/Documentation
+20041102 13:09:11 start Operations/Monitoring
+20041102 13:12:10 start Operations/Documentation
+20041102 13:12:13 start Operations/Monitoring
+20041102 13:15:38 start Operations/Documentation
+20041102 13:29:09 start Operations/Requests
+20041102 13:41:29 start Operations/Documentation
+20041102 13:42:18 start Operations/Monitoring
+20041102 13:42:57 start Operations/Monitoring
+20041102 14:50:36 start Operations/Requests
+20041102 14:58:02 start Operations/Documentation
+20041102 17:45:20 start Operations/Monitoring (Actionable)
+20041102 18:04:03 start Operations/Monitoring
+20041102 18:04:39 stop 
+20041102 18:08:26 start Operations/Monitoring
+20041102 18:08:35 stop 
+20041103 10:39:29 start Operations/Monitoring
+20041103 11:53:45 start Operations/Monitoring (Actionable)
+20041103 11:56:13 start Project 1/SNMP
+20041103 11:59:42 start Project 3/General Admin
+20041103 12:25:18 start Operations/Monitoring (Actionable)
+20041103 12:26:41 stop 
+20041103 12:30:20 start Operations/Monitoring (Actionable)
+20041103 12:37:22 start Operations/Monitoring (Actionable)
+20041103 12:37:29 stop 
+20041103 12:40:21 start Operations/Monitoring (Actionable)
+20041103 12:54:58 stop 
+20041103 13:33:00 start Operations/Monitoring (Actionable)
+20041103 17:12:14 start Project 1/Maintenance
+20041103 17:35:15 stop 
+20041104 10:54:12 start General/Communication
+20041104 11:15:20 start Project 1/Maintenance
+20041104 11:35:26 start General/Bureaucracy
+20041104 12:02:06 start General/Communication
+20041104 12:09:46 start General/Bureaucracy
+20041104 12:30:50 start Operations/Monitoring (Actionable)
+20041104 12:35:55 stop 
+20041104 13:05:29 start Project 1/Maintenance
+20041104 13:05:44 stop 
+20041104 13:17:08 start General/Communication
+20041104 13:53:44 start General/Bureaucracy
+20041104 15:00:00 start General/Meetings
+20041104 15:34:46 start General/Communication
+20041104 17:55:00 stop 
+20041105 10:24:00 start Project 1/Maintenance
+20041105 10:27:56 start Operations/Monitoring
+20041105 10:29:55 start Operations/Documentation
+20041105 10:33:06 start Operations/Monitoring
+20041105 10:33:19 start Operations/Monitoring
+20041105 11:07:29 start Project 1/Maintenance
+20041105 11:07:33 start Operations/Monitoring
+20041105 11:07:43 start Project 1/Maintenance
+20041105 11:43:08 start Operations/Requests
+20041105 12:26:53 start Project 1/Maintenance
+20041105 13:38:31 stop 
+20041105 14:17:27 start Project 1/Maintenance
+20041105 18:07:13 stop 
+20041108 10:00:00 start General/Meetings
+20041108 11:00:00 start General/Communication
+20041108 11:21:44 start Project 1/Development
+20041108 13:05:02 stop 
+20041108 13:29:40 start Project 1/Maintenance
+20041108 13:29:41 start Project 1/Development
+20041108 13:31:59 start Project 1/Maintenance
+20041108 13:33:43 start Project 1/Development
+20041108 14:32:19 start Project 1/Maintenance
+20041108 14:55:15 start Project 1/Development
+20041108 15:26:07 start General/Communication
+20041108 15:58:40 start Project 1/Development
+20041108 16:10:54 start Operations/Documentation
+20041108 16:58:29 start Project 1/Development
+20041108 17:38:03 stop 
+20041109 10:36:23 start General/Communication
+20041109 10:45:56 start Operations/Documentation
+20041109 11:21:23 start Project 1/Development
+20041109 11:55:09 stop 
+20041109 12:28:01 start General/Meetings
+20041109 13:47:04 stop 
+20041109 14:03:00 start General/Meetings
+20041109 15:22:13 start Project 1/Development
+20041109 16:35:09 start Operations/Documentation
+20041109 18:00:00 stop 
+20041110 09:20:00 start General/Communication
+20041110 09:30:00 stop 
+20041110 10:10:23 start Project 1/Maintenance
+20041110 10:18:51 stop 
+20041110 10:28:05 start Project 1/Maintenance
+20041110 11:06:46 start General/Communication
+20041110 11:43:30 start Project 2/Research
+20041110 13:48:05 stop 
+20041110 14:23:35 start General/Communication
+20041110 14:44:52 start Project 2/Research
+20041110 15:51:19 start Operations/Documentation
+20041110 16:23:37 start Project 2/Research
+20041110 18:02:25 stop 
+20041112 10:20:00 start General/Communication
+20041112 10:47:00 start Project 1/Maintenance
+20041112 10:49:54 start Project 3/General Admin
+20041112 12:12:09 stop
+20041112 13:12:00 start Project 1/Maintenance
+20041112 14:15:53 start Operations/Documentation
+20041112 14:21:09 start Project 1/Development
+20041112 14:23:07 start Operations/Documentation
+20041112 15:00:58 start Project 1/Development
+20041112 18:00:00 stop
+20041114 21:05:00 start Project 1/Development
+20041114 22:00:00 start Project 2/Task X
+20041114 23:30:00 stop
+20041115 10:25:00 start General/Meetings
+20041115 11:05:00 start General/Communication
+20041115 11:25:00 start Project 1/Maintenance
+20041115 11:38:48 start Project 2/Task X
+20041115 12:32:28 start Project 1/Development
+20041115 13:01:07 stop
+20041115 13:21:32 start Project 1/Maintenance
+20041115 14:08:47 start Project 1/Development
+20041115 16:49:47 stop
+20041115 18:18:51 start Project 1/Development
+20041115 18:54:43 start Project 2/Task X
+20041115 20:39:57 stop
+20041115 21:40:46 start Project 2/Task X
+20041115 22:52:29 stop
+20041115 23:56:36 start Project 2/Task X
+20041116 01:28:47 stop
+20041116 10:00:00 start General/Communication
+20041116 10:52:54 start Project 1/Development
+20041116 12:31:34 stop
+20041116 12:59:36 start Operations/Monitoring (Actionable)
+20041116 13:52:36 start Operations/Requests
+20041116 16:00:00 start Project 1/Development
+20041116 16:30:00 start Operations/Requests
+20041116 18:03:31 stop
+20041116 21:00:00 start Operations/Monitoring
+20041116 21:15:00 stop
+20041117 10:00:00 start General/Communication
+20041117 10:48:02 start Operations/Monitoring
+20041117 11:32:15 start Operations/Requests
+20041117 11:42:32 start Project 1/Development
+20041117 11:42:35 start Operations/Requests
+20041117 11:55:04 stop
+20041117 13:09:38 start Operations/Monitoring
+20041117 15:37:17 start Operations/Requests
+20041117 16:30:20 start Operations/Monitoring
+20041117 17:15:00 stop
+20041118 10:19:39 start General/Communication
+20041118 10:43:21 start Operations/Requests
+20041118 10:43:28 start Operations/Monitoring (Actionable)
+20041118 11:43:06 start Operations/Monitoring
+20041118 13:19:35 stop
+20041118 13:48:51 start Operations/Requests
+20041118 16:50:00 stop
+20041118 23:00:00 start Operations/Monitoring (Actionable)
+20041118 23:45:00 stop
+20041119 10:06:56 start General/Communication
+20041119 11:07:50 start Operations/Monitoring (Actionable)
+20041119 11:43:28 start Operations/Requests
+20041119 12:10:00 stop
+20041119 13:46:49 start Operations/Monitoring
+20041119 13:50:21 start Operations/Requests
+20041119 14:01:10 start Operations/Monitoring
+20041119 16:01:02 start Operations/Requests
+20041119 19:47:39 stop
+20041120 23:24:09 start Operations/Monitoring
+20041120 23:24:59 start Project 1/Maintenance
+20041120 23:53:43 start Operations/Monitoring
+20041121 01:16:19 start Project 1/Maintenance
+20041121 02:20:00 stop
+20041121 07:35:00 start Operations/Monitoring
+20041121 09:00:00 stop
+20041122 07:30:00 start General/Conference
+20041122 17:30:00 stop
+20041123 10:00:00 start General/Meetings
+20041123 11:15:00 start General/Communication
+20041123 11:50:00 start Operations/Requests
+20041123 12:46:22 start Project 1/Development
+20041123 12:46:39 start Project 2/Task X
+20041123 13:12:00 stop
+20041123 13:33:12 start Operations/Requests
+20041123 13:39:23 stop
+20041123 14:03:13 start Project 2/Task X
+20041123 15:03:14 start Project 3/General Admin
+20041123 15:19:57 start Project 2/Task X
+20041123 15:25:10 start Project 3/General Admin
+20041123 15:34:03 start Project 2/Task X
+20041123 17:13:16 stop
+20041123 18:11:21 stop
+20041124 10:32:50 start General/Communication
+20041124 11:32:32 start Project 2/Task X
+20041124 12:00:05 stop
+20041124 13:12:11 start Project 1/Development
+20041124 17:07:41 start Project 2/Task X
+20041126 10:30:00 start General/Communication
+20041126 12:12:21 start Project 3/General Admin
+20041126 12:19:59 start Project 1/Development
+20041126 12:31:35 start Project 1/Development
+20041126 12:55:20 stop
+20041126 13:28:12 start Project 1/Development
+20041126 14:25:05 start Project 1/Maintenance
+20041126 14:46:04 start Project 1/Development
+20041126 18:05:13 stop
+20041128 13:51:10 start Project 1/Development
+20041128 15:13:56 stop
+20041128 15:43:05 start Project 1/Development
+20041128 16:01:59 stop
+20041128 16:34:25 start Project 1/Development
+20041128 16:35:53 stop
+20041128 16:52:28 start Project 1/Development
+20041128 18:31:15 stop
+20041128 22:30:43 start Project 1/Development
+20041129 01:20:48 stop
+20041129 10:28:59 start General/Communication
+20041129 10:50:45 start Project 1/Maintenance
+20041129 10:56:18 start Project 1/Development
+20041129 11:05:47 start Project 1/Maintenance
+20041129 11:11:14 start Project 1/Development
+20041129 12:12:37 stop
+20041129 13:05:34 start Project 1/Development
+20041129 13:33:22 start Project 3/General Admin
+20041129 14:29:00 start Project 1/Development
+20041129 15:53:40 start General/Communication
+20041129 16:32:40 start Project 1/Development
+20041129 18:13:19 stop
+20041129 22:17:11 start Project 1/Development
+20041130 09:57:26 start Project 3/General Admin
+20041130 11:01:47 start Project 2/Task X
+20041130 12:26:46 stop
+20041130 14:00:00 start General/Meetings
+20041130 14:43:00 start General/Communication
+20041130 15:53:25 start Project 3/General Admin
+20041130 16:31:20 start Project 1/Maintenance
+20041130 18:13:42 stop
+20041130 23:36:37 start Project 1/Development
+20041201 00:17:39 stop
+20041201 01:15:39 start Project 1/Development
+20041201 02:44:14 stop
+20041201 10:00:48 start General/Communication
+20041201 10:36:42 start Project 1/Maintenance
+20041201 11:10:31 start Project 1/Development
+20041201 11:59:13 stop
+20041201 13:06:50 start Project 3/General Admin
+20041201 13:47:46 start Project 1/Development
+20041201 14:20:58 start Project 3/General Admin
+20041201 15:41:47 start Project 1/Development
+20041201 18:25:40 stop
+20041202 10:41:04 start General/Communication
+20041202 11:09:16 start Project 1/Maintenance
+20041202 11:37:07 start Project 1/Development
+20041202 12:30:24 start Project 1/Maintenance
+20041202 12:38:33 start Project 1/Development
+20041202 13:10:00 stop
+20041202 13:52:22 start Project 1/Development
+20041202 17:23:08 stop
+20041202 17:59:30 start Project 1/Development
+20041202 21:59:08 stop
+20041202 23:19:57 start Project 1/Development
+20041203 00:30:36 stop
+20041203 01:00:00 start Project 1/Development
+20041203 02:00:00 stop
+20041203 10:42:32 start General/Communication
+20041203 11:08:10 start Project 1/Development
+20041203 12:53:41 stop
+20041203 13:18:51 start General/Communication
+20041203 15:42:50 start Project 1/Development
+20041203 17:00:41 start Project 3/General Admin
+20041203 17:46:32 start Operations/Documentation
+20041203 18:51:12 stop
+20041204 01:07:51 start Project 1/Development
+20041204 01:34:02 stop
+20041206 22:22:26 start Project 1/Maintenance
+20041206 22:52:26 start Project 1/Development
+20041207 00:04:41 stop
+20041207 10:33:08 start General/Communication
+20041207 11:13:08 stop
+20041207 22:19:02 start General/Communication
+20041207 22:33:35 stop
+20041210 17:03:27 start General/Communication
+20041210 17:13:27 start Project 1/Maintenance
+20041210 18:00:51 stop
+20041211 00:27:21 start Project 1/Maintenance
+20041211 01:00:02 stop
+20041211 21:30:54 start Project 1/Maintenance
+20041211 22:04:02 stop
+20041211 22:45:55 start Project 1/Maintenance
+20041212 00:06:53 stop
+20041213 14:00:00 start General/Communication
+20041213 15:00:00 start Project 1/Maintenance
+20041213 16:10:20 stop
+20041216 14:00:00 start General/Communication
+20041216 14:20:00 stop
+20041216 18:00:00 start Project 1/Maintenance
+20041216 18:30:00 stop

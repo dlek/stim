@@ -1,0 +1,21 @@
+#!/bin/bash
+
+failed()
+{
+  echo "FAILED: $TEST_NAME - $TEST_DESCRIPTION"
+  echo "Expected vs result:"
+  echo "$TEST_DIFF"
+}
+export -f failed
+
+success()
+{
+  echo "Okay: $TEST_NAME - $TEST_DESCRIPTION"
+}
+export -f success
+
+basepath=$(dirname $0)
+for test in *.exe
+do
+  $basepath/$test
+done
