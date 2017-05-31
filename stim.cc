@@ -569,7 +569,7 @@ bool Stim::Status(time_t tNow, TSessionStatus& tSession)
     string sSessionStartDate = ""; 
     string sTimestamp, sEvent, sDetail;
     bool bContinue = true;
-    bool bRunning;
+    bool bRunning = false;
     while (bContinue)
     {
         Stim::Trace("here we are... about to read a log line...");
@@ -595,43 +595,50 @@ bool Stim::Status(time_t tNow, TSessionStatus& tSession)
         GkGrokTimestamp(tTimeStamp, sTimestamp.c_str());
 
         // if starting a new session
-        if (tLastTime == STIM_TIME_NOTIME)
+        if (!bRunning)
         {
-            // reports don't distinguish between sessions
-            // nothing to report, just go on to next task
-            tLastTime = tTimeStamp;
-            sLastTask = sDetail;
-            continue;
+          // if this is the first entry of a new day, it must be a start event
+          // or FindStartOfDay wouldn't have started here
+          tLastTime = tTimeStamp;
+          sLastTask = sDetail;
+          bRunning = true;
+
+          // status report doesn't distinguish between sessions, so there is
+          // nothing to report: just go on to next task
         }
 
         // otherwise, was working on a task, done with it for now
         else
         {
-            // calculate time difference
-            time_t tTimeDiff = tTimeStamp - tLastTime;
+          // calculate time difference
+          time_t tTimeDiff = tTimeStamp - tLastTime;
 
-            // add to task totals
-            AddToTaskTotals(vSessionTime, sLastTask, tTimeDiff);
-        }
+          // add to task totals
+          AddToTaskTotals(vSessionTime, sLastTask, tTimeDiff);
 
-        // starting or stopping?
-        if (sEvent == STIM_TASK_START)
-        { 
+          // starting or stopping?
+          if (sEvent == STIM_TASK_START)
+          { 
             Stim::Trace("Starting new task");
+            bRunning = true;
 
             // this task becomes the previous task
             sLastTask = sDetail;
-        }
-        else if (sEvent == STIM_TASK_STOP)
-        {
+          }
+          else if (sEvent == STIM_TASK_STOP)
+          {
             Stim::Trace("Stopping task");
+
+            // for next time: there is no previous task
+            //tLastTime = STIM_TIME_NOTIME;
 
             // if it were true, you'd better catch it
             bRunning = false;
-        }
+          }
 
-        // this is the start time of the current time chunk
-        tLastTime = tTimeStamp;
+          // this is the start time of the current time chunk
+          tLastTime = tTimeStamp;
+        }
     }
 
     // determine total session time, excluding current task

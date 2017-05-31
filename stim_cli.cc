@@ -317,20 +317,34 @@ int main(int argc, char** argv)
                   // unlike the "raw" output, the human-readable output 
                   // calculates the session time with the current task's time
                   // included
-                  time_t aElapsedOnTask = tNow - tSession.aTransitionTime;
-
+                  time_t aElapsedSinceTransition = tNow - tSession.aTransitionTime;
                   // make session and task times readable
                   string sSessionTime;
                   string sTaskTime;
-                  SecondsToHms(tSession.aSessionTime + aElapsedOnTask, sSessionTime);
-                  SecondsToHms(tSession.aTaskTime + aElapsedOnTask, sTaskTime);
+                  string sTimerStatus;
+                  if (tSession.bRunning)
+                  {
+                    SecondsToHms(tSession.aSessionTime + aElapsedSinceTransition, 
+                      sSessionTime);
+                    SecondsToHms(tSession.aTaskTime + aElapsedSinceTransition, 
+                      sTaskTime);
+
+                    sTimerStatus = "running";
+                  }
+                  else
+                  {
+                    SecondsToHms(tSession.aSessionTime, sSessionTime);
+                    SecondsToHms(tSession.aTaskTime, sTaskTime);
+                    SecondsToHms(aElapsedSinceTransition, sTimerStatus);
+                    sTimerStatus.insert(0, "stopped for ");
+                  }
 
                   // echo session and task times, timer state and current or last task
                   cout
                     << "Session time: " << sSessionTime << std::endl
                     << "Task time:    " << sTaskTime << std::endl
                     << "Task:         " << tSession.sCurrentTask  << std::endl
-                    << "Timer is      " << (tSession.bRunning ? "running" : "stopped")
+                    << "Timer is      " << sTimerStatus
                     << endl;
                 }
               }
