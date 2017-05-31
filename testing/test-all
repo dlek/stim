@@ -5,6 +5,7 @@ failed()
   echo "FAILED: $TEST_NAME - $TEST_DESCRIPTION"
   echo "Expected vs result:"
   echo "$TEST_DIFF"
+  exit 1
 }
 export -f failed
 
