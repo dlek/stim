@@ -3,7 +3,7 @@
 failed()
 {
   echo "FAILED: $TEST_NAME - $TEST_DESCRIPTION"
-  echo "Expected vs result:"
+  echo "Result vs. expected:"
   echo "$TEST_DIFF"
   exit 1
 }
