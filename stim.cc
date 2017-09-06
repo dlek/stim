@@ -126,7 +126,7 @@ void SecondsToHms(int iSeconds, string& sHms)
     iMinutes %= 60;
 
     // build into string of format HH:MM:SS
-    char szHms[9];
+    char szHms[12];
     sprintf(szHms, "%02d:%02d:%02d", iHours, iMinutes, iSeconds);
     sHms = szHms;
 }
