@@ -15,7 +15,7 @@ using std::vector;
 
 
 // Ensure Stim environment exists and is useful
-int EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bInitialise = false)
+void EnsureStimEnvironment(const char* szHomeDir, const char* szLogFile, bool bInitialise = false)
 { 
   struct stat sb;
   string s;
