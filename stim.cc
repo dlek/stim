@@ -466,9 +466,10 @@ bool Stim::FindPeriodStart(time_t aPeriodStart, time_t aPeriodEnd)
         streampos tLogPos = this->m_fLog.tellg();      
         bMoreLog = ReadLog(sTimestamp, sEvent, sDetail);
 
-        // compare timestamp
+        // compare timestamp and that it's a START event, not left over from
+        // last session
         GkGrokTimestamp(aTime, sTimestamp.c_str());
-        if (aTime >= aPeriodStart)
+        if (aTime >= aPeriodStart && sEvent == STIM_TASK_START)
         {
             // check that we haven't overshot
             if (aTime >= aPeriodEnd)
